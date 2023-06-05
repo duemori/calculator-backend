@@ -13,3 +13,5 @@ Since a starting credit is required to execute the operations, an endpoint was c
 - To generate random string, third-party operation should be used (https://www.random.org/clients).
 
 Created using Java 17, Spring Boot 2.7.7, JPA, MySQL and Redis. Talking about tests, used JUnit, Mockito, DataJpaTest and H2.
+
+**Important:** The development is not finished. Expectation was to integrate this api with an authentication server using JWT, making it possible to identify with security the user logged and execute all operations just for him. For now, the userId is informed in every single operation.

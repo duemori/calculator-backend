@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-volume:/var/lib/mysql
+      - ./database/scripts:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - '6379:6379'
+    volumes: 
+      - redis-volume:/data
+
+  calculatorapi:
+    build: ./calculatorapi
+    container_name: calculator-api
+    ports:
+      - '8082:8082'
+    restart: on-failure
+    depends_on:
+      - mysql
+      - redis
+
+  userapi:
+    build: ./userapi
+    container_name: user-api
+    ports:
+      - '8083:8083'
+    restart: on-failure
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-volume:
+  redis-volume:

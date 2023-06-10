@@ -34,9 +34,8 @@ import br.com.userapi.util.TestDummies;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-	private static final boolean ACTIVE = true;
-
 	private static final int ID = 1;
+	private static final boolean ACTIVE = true;
 
 	@Mock
 	private UserRepository userRepository;
@@ -65,7 +64,7 @@ class UserServiceTest {
 
 	@Test
 	void testCreateWithValidUserShouldReturnUserIdFromRepositoryResponse() {
-		var user = TestDummies.getUser();
+		var user = TestDummies.getUser(ID);
 
 		when(this.userRepository.existsByEmailAndActiveTrue(anyString())).thenReturn(false);
 		when(this.userRepository.save(any(User.class))).thenReturn(user);
@@ -81,7 +80,7 @@ class UserServiceTest {
 
 	@Test
 	void testFindAllShouldReturnTransactionsFromRepositoryQueryResult() {
-		var user = TestDummies.getUser();
+		var user = TestDummies.getUser(ID);
 
 		when(this.userRepository.findAll(ArgumentMatchers.<Specification<User>>any(), any(Pageable.class)))
 				.thenReturn(new PageImpl<User>(List.of(user)));
@@ -113,18 +112,18 @@ class UserServiceTest {
 
 	@Test
 	void testUpdateStatusToSameStatusShouldJustReturn() {
-		var user = TestDummies.getUser();
+		var user = TestDummies.getUser(ID);
 
 		when(this.userRepository.findById(anyInt())).thenReturn(Optional.of(user));
 
-		this.userService.updateStatus(ID, user.isActive());
+		this.userService.updateStatus(user.getId(), user.isActive());
 
 		verify(this.userRepository, only()).findById(anyInt());
 	}
 
 	@Test
 	void testUpdateStatusFromNotActiveToActiveWithUserAlreadyRegisteredShouldThrowConflictException() {
-		var user = TestDummies.getNotActiveUser();
+		var user = TestDummies.getNotActiveUser(ID);
 
 		when(this.userRepository.findById(anyInt())).thenReturn(Optional.of(user));
 		when(this.userRepository.existsByEmailAndActiveTrue(anyString())).thenReturn(true);
@@ -142,13 +141,13 @@ class UserServiceTest {
 
 	@Test
 	void testUpdateStatusFromNotActiveToActiveWithUserNotRegisteredShouldSaveModelUpdated() {
-		var user = TestDummies.getNotActiveUser();
+		var user = TestDummies.getNotActiveUser(ID);
 
 		when(this.userRepository.findById(anyInt())).thenReturn(Optional.of(user));
 		when(this.userRepository.existsByEmailAndActiveTrue(anyString())).thenReturn(false);
 		when(this.userRepository.save(any(User.class))).thenReturn(user);
 
-		this.userService.updateStatus(ID, ACTIVE);
+		this.userService.updateStatus(user.getId(), ACTIVE);
 
 		verify(this.userRepository, times(1)).findById(anyInt());
 		verify(this.userRepository, times(1)).existsByEmailAndActiveTrue(anyString());
@@ -158,12 +157,12 @@ class UserServiceTest {
 
 	@Test
 	void testUpdateStatusToNotActiveShouldSaveModelUpdated() {
-		var user = TestDummies.getUser();
+		var user = TestDummies.getUser(ID);
 
 		when(this.userRepository.findById(anyInt())).thenReturn(Optional.of(user));
 		when(this.userRepository.save(any(User.class))).thenReturn(user);
 
-		this.userService.updateStatus(ID, false);
+		this.userService.updateStatus(user.getId(), false);
 
 		verify(this.userRepository, times(1)).findById(anyInt());
 		verify(this.userRepository, times(1)).save(any(User.class));

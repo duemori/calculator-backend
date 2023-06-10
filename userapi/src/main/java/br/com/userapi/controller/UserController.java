@@ -1,6 +1,6 @@
 package br.com.userapi.controller;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -20,15 +20,15 @@ import br.com.userapi.model.dto.UserDTO;
 import br.com.userapi.model.dto.UserFilterDTO;
 import br.com.userapi.model.vo.UserVO;
 import br.com.userapi.service.UserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/v1/users")
-@Api(tags = "Users API")
+@Tag(name = "Users API")
 public class UserController {
 
 	private final UserService userService;
@@ -39,13 +39,13 @@ public class UserController {
 
 	@PostMapping
 	@ResponseStatus(code = HttpStatus.CREATED)
-	@ApiOperation(value = "Creates a user")
+	@Operation(summary = "Creates a user")
 	@ApiResponses(value = {
-			@ApiResponse(code = 201, message = "User created"),
-			@ApiResponse(code = 400, message = "Bad request"),
-			@ApiResponse(code = 409, message = "Email already in use")
+			@ApiResponse(responseCode = "201", description = "User created"),
+			@ApiResponse(responseCode = "400", description = "Bad request"),
+			@ApiResponse(responseCode = "409", description = "Email already in use")
 	})
-	public ResponseEntity<Void> create(@Valid @RequestBody @ApiParam(value = "User information") UserDTO user) {
+	public ResponseEntity<Void> create(@Valid @RequestBody @Parameter(description = "User information") UserDTO user) {
 		var id = this.userService.create(user);
 		var uri = UriComponentsBuilder.fromPath("/v1/users/{id}").buildAndExpand(id).toUri();
 
@@ -53,21 +53,21 @@ public class UserController {
 	}
 
 	@GetMapping
-	@ApiOperation(value = "List all users filtered and paginated")
+	@Operation(summary = "List all users filtered and paginated")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Return users filtered and paginated"),
-			@ApiResponse(code = 400, message = "Bad request")
+			@ApiResponse(responseCode = "200", description = "Return users filtered and paginated"),
+			@ApiResponse(responseCode = "400", description = "Bad request")
 	})
 	public ResponseEntity<Page<UserVO>> findAll(@Valid UserFilterDTO filter) {
 		return ResponseEntity.ok(this.userService.findAll(filter));
 	}
 
 	@PatchMapping("{id}")
-	@ApiOperation(value = "Change user status")
+	@Operation(summary = "Change user status")
 	@ApiResponses(value = {
-			@ApiResponse(code = 204, message = "Status updated"),
-			@ApiResponse(code = 404, message = "User not found"),
-			@ApiResponse(code = 409, message = "Another user with the same email is active"),
+			@ApiResponse(responseCode = "204", description = "Status updated"),
+			@ApiResponse(responseCode = "404", description = "User not found"),
+			@ApiResponse(responseCode = "409", description = "Another user with the same email is active")
 	})
 	public ResponseEntity<Void> updateStatus(@PathVariable Integer id, @RequestParam Boolean active) {
 		this.userService.updateStatus(id, active);

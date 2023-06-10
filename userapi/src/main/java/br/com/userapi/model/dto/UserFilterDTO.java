@@ -2,8 +2,8 @@ package br.com.userapi.model.dto;
 
 import java.time.LocalDate;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;

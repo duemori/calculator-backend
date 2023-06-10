@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.7</version>
+		<version>3.0.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.com</groupId>
@@ -15,7 +15,6 @@
 	<description>API for executing calculations and persisting transactions</description>
 	<properties>
 		<java.version>17</java.version>
-		<io.springfox.version>3.0.0</io.springfox.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -49,19 +48,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>${io.springfox.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${io.springfox.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-boot-starter</artifactId>
-			<version>${io.springfox.version}</version>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -70,6 +59,15 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>

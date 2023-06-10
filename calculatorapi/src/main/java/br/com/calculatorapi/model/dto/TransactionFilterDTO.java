@@ -1,7 +1,7 @@
 package br.com.calculatorapi.model.dto;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 public class TransactionFilterDTO {
 	private String search;

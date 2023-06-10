@@ -20,7 +20,7 @@ import br.com.userapi.util.UserSpecifications;
 
 @DataJpaTest
 @TestInstance(Lifecycle.PER_CLASS)
-class TransactionRepositoryTest {
+class UserRepositoryTest {
 
 	@Autowired
 	private UserRepository userRepository;
@@ -31,8 +31,8 @@ class TransactionRepositoryTest {
 
 	@BeforeAll
 	void setup() {
-		this.user1 = this.userRepository.save(TestDummies.getUser());
-		this.user2 = this.userRepository.save(TestDummies.getNotActiveUser());
+		this.user1 = this.userRepository.save(TestDummies.getUser(null));
+		this.user2 = this.userRepository.save(TestDummies.getNotActiveUser(null));
 
 		this.ids = List.of(user1.getId(), user2.getId());
 	}

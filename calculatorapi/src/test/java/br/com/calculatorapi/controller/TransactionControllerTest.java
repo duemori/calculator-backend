@@ -9,6 +9,7 @@ import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,6 +30,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +45,7 @@ import br.com.calculatorapi.model.dto.TransactionFilterDTO;
 import br.com.calculatorapi.service.TransactionService;
 import br.com.calculatorapi.util.TestDummies;
 
+@WithMockUser
 @WebMvcTest(controllers = TransactionController.class)
 class TransactionControllerTest {
 
@@ -54,7 +57,7 @@ class TransactionControllerTest {
 
 	@Test
 	void testCreateWithoutRequiredFieldsShouldReturnStatusBadRequest() throws Exception {
-		this.mockMvc.perform(post("/v1/transactions").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/v1/transactions").with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isBadRequest())
 				.andExpect(content().string(containsString("operationId is required")))
 				.andExpect(content().string(containsString("userId is required")))
@@ -70,7 +73,7 @@ class TransactionControllerTest {
 
 		when(this.transactionService.create(any(TransactionDTO.class))).thenThrow(throwable);
 
-		this.mockMvc.perform(post("/v1/transactions").contentType(MediaType.APPLICATION_JSON).content(body))
+		this.mockMvc.perform(post("/v1/transactions").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
 				.andExpect(status().is(status.value()))
 				.andExpect(content().string(errorMessage));
 
@@ -95,7 +98,7 @@ class TransactionControllerTest {
 
 		when(this.transactionService.create(any(TransactionDTO.class))).thenReturn(id);
 
-		this.mockMvc.perform(post("/v1/transactions").contentType(MediaType.APPLICATION_JSON).content(body))
+		this.mockMvc.perform(post("/v1/transactions").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
 				.andExpect(status().isCreated())
 				.andExpect(content().string(""))
 				.andExpect(header().string("location", "/v1/transactions/" + id));
@@ -105,7 +108,7 @@ class TransactionControllerTest {
 
 	@Test
 	void testCreditWithoutRequiredFieldsShouldReturnStatusBadRequest() throws Exception {
-		this.mockMvc.perform(post("/v1/transactions/credits").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/v1/transactions/credits").with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isBadRequest())
 				.andExpect(content().string(containsString("userId is required")))
 				.andExpect(content().string(containsString("amount is required")));
@@ -120,7 +123,7 @@ class TransactionControllerTest {
 
 		when(this.transactionService.create(any(CreditDTO.class))).thenReturn(id);
 
-		this.mockMvc.perform(post("/v1/transactions/credits").contentType(MediaType.APPLICATION_JSON).content(body))
+		this.mockMvc.perform(post("/v1/transactions/credits").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
 				.andExpect(status().isCreated())
 				.andExpect(content().string(""))
 				.andExpect(header().string("location", "/v1/transactions/" + id));
@@ -156,7 +159,7 @@ class TransactionControllerTest {
 	void testDeleteWithValidIdShouldReturnStatusNoContent() throws Exception {
 		doNothing().when(this.transactionService).delete(anyInt());
 
-		this.mockMvc.perform(delete("/v1/transactions/1"))
+		this.mockMvc.perform(delete("/v1/transactions/1").with(csrf()))
 				.andExpect(status().isNoContent())
 				.andExpect(content().string(""));
 

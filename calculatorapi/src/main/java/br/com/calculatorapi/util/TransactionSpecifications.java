@@ -1,6 +1,6 @@
 package br.com.calculatorapi.util;
 
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;

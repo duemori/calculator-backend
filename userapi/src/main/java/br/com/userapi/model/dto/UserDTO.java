@@ -1,6 +1,6 @@
 package br.com.userapi.model.dto;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 public class UserDTO {
 

@@ -2,11 +2,11 @@ package br.com.userapi.model;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -27,6 +27,7 @@ public class User {
 	public User() {	}
 
 	public User(UserBuilder builder) {
+		this.id = builder.id;
 		this.password = builder.password;
 		this.email = builder.email;
 		this.date = LocalDateTime.now();
@@ -67,10 +68,16 @@ public class User {
 	}
 
 	public static class UserBuilder {
+		private Integer id;
 		private String email;
 		private String password;
 
 		private UserBuilder() {	}
+
+		public UserBuilder withId(Integer id) {
+			this.id = id;
+			return this;
+		}
 
 		public UserBuilder withEmail(String email) {
 			this.email = email;

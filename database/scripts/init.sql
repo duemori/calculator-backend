@@ -41,6 +41,8 @@ CREATE TABLE person.users (
 	INDEX users_email_idx (email)
 );
 
+INSERT INTO person.users (email, password, date, active) VALUES ('test@test.com','{bcrypt}$2a$10$NpmqIXiJ4ZTra.btzM/bZ.DS7OnvO/BnkEiSnpT9sO.RINPNu/Td2',NOW(),true);
+
 CREATE USER 'calculator'@'%' IDENTIFIED BY 'calc123';
 GRANT ALL PRIVILEGES ON calculator.* TO 'calculator'@'%';
 

@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.calculatorapi.model.vo.OperationVO;
 import br.com.calculatorapi.service.OperationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/v1/operations")
-@Api(tags = "Operations API")
+@Tag(name = "Operations API")
 public class OperationController {
 
 	private final OperationService operationService;
@@ -26,8 +26,8 @@ public class OperationController {
 	}
 
 	@GetMapping
-	@ApiOperation(value = "List all available operations")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Return available operations") })
+	@Operation(summary = "List all available operations")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Return available operations") })
 	public ResponseEntity<List<OperationVO>> getAll() {
 		return ResponseEntity.ok(this.operationService.findAll());
 	}

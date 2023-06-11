@@ -40,7 +40,8 @@ class OperationControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$").value(hasSize(1)))
 				.andExpect(jsonPath("$[0].id").value(operation.getId()))
-				.andExpect(jsonPath("$[0].description").value(operation.getDescription()));
+				.andExpect(jsonPath("$[0].description").value(operation.getDescription()))
+				.andExpect(jsonPath("$[0].params").value(operation.getParams().toString()));
 
 		verify(this.operationService, only()).findAll();
 	}

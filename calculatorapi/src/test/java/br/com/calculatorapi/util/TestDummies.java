@@ -67,11 +67,12 @@ public final class TestDummies {
 		operation.setName(OperationType.ADDITION);
 		operation.setDescription("Addition");
 		operation.setCost(BigDecimal.valueOf(0.953));
+		operation.setParams(Byte.valueOf("2"));
 		return operation;
 	}
 
 	public static OperationVO getOperationVO() {
-		return OperationVO.builder().withId(1).withDescription("Addition").build();
+		return OperationVO.builder().withId(1).withDescription("Addition").withParams(Byte.valueOf("2")).build();
 	}
 
 	public static TransactionFilterDTO getTransactionFilterDTO() {

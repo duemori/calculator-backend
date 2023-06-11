@@ -22,8 +22,9 @@ public class Operation {
 
 	private BigDecimal cost;
 
-	public Operation() {
-	}
+	private Byte params;
+
+	public Operation() { }
 
 	public Operation(Integer id) {
 		this.id = id;
@@ -61,8 +62,17 @@ public class Operation {
 		this.cost = cost;
 	}
 
+	public Byte getParams() {
+		return params;
+	}
+
+	public void setParams(Byte params) {
+		this.params = params;
+	}
+
 	@Override
 	public String toString() {
-		return "Operation [id=" + id + ", name=" + name + ", description=" + description + ", cost=" + cost + "]";
+		return "Operation [id=" + id + ", name=" + name + ", description=" + description + ", cost=" + cost
+				+ ", params=" + params + "]";
 	}
 }

@@ -2,24 +2,25 @@ CREATE DATABASE calculator;
 CREATE DATABASE person;
 
 CREATE TABLE calculator.operations (
-	id int NOT NULL AUTO_INCREMENT,
+	id INT NOT NULL AUTO_INCREMENT,
 	name VARCHAR(20) NOT NULL,
 	description VARCHAR(20) NOT NULL,
+	params TINYINT NOT NULL,
 	cost DECIMAL(5,2) NOT NULL,
 	PRIMARY KEY (id)
 );
 
-INSERT INTO calculator.operations (id, name, description, cost) VALUES (1, 'ADDITION', 'Addition', 0.5);
-INSERT INTO calculator.operations (id, name, description, cost) VALUES (2, 'SUBTRACTION', 'Subtraction', 0.6);
-INSERT INTO calculator.operations (id, name, description, cost) VALUES (3, 'MULTIPLICATION', 'Multiplication', 1.2);
-INSERT INTO calculator.operations (id, name, description, cost) VALUES (4, 'DIVISION', 'Division', 1.7);
-INSERT INTO calculator.operations (id, name, description, cost) VALUES (5, 'SQUARE_ROOT', 'Square root', 2.3);
-INSERT INTO calculator.operations (id, name, description, cost) VALUES (6, 'RANDOM_STRING', 'Random string', 3.5);
+INSERT INTO calculator.operations (id, name, description, params, cost) VALUES (1, 'ADDITION', 'Addition', 2, 0.5);
+INSERT INTO calculator.operations (id, name, description, params, cost) VALUES (2, 'SUBTRACTION', 'Subtraction', 2, 0.6);
+INSERT INTO calculator.operations (id, name, description, params, cost) VALUES (3, 'MULTIPLICATION', 'Multiplication', 2, 1.2);
+INSERT INTO calculator.operations (id, name, description, params, cost) VALUES (4, 'DIVISION', 'Division', 2, 1.7);
+INSERT INTO calculator.operations (id, name, description, params, cost) VALUES (5, 'SQUARE_ROOT', 'Square root', 1, 2.3);
+INSERT INTO calculator.operations (id, name, description, params, cost) VALUES (6, 'RANDOM_STRING', 'Random string', 0, 3.5);
 
 CREATE TABLE calculator.transactions (
-	id int NOT NULL AUTO_INCREMENT,
-	operations_id int NULL,
-	users_id int NOT NULL,
+	id INT NOT NULL AUTO_INCREMENT,
+	operations_id INT NULL,
+	users_id INT NOT NULL,
 	amount DECIMAL(9,2) NOT NULL,
 	credit_debit CHAR(1) NOT NULL,
 	params VARCHAR(25) NULL,
@@ -32,7 +33,7 @@ CREATE TABLE calculator.transactions (
 );
 
 CREATE TABLE person.users (
-	id int NOT NULL AUTO_INCREMENT,
+	id INT NOT NULL AUTO_INCREMENT,
 	email VARCHAR(255) NOT NULL,
 	password VARCHAR(255) NOT NULL,
 	date DATETIME NOT NULL,

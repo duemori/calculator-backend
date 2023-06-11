@@ -20,6 +20,7 @@ public class OperationService {
 		return this.operationRepository.findAll().stream().map(operation -> OperationVO.builder()
 				.withId(operation.getId())
 				.withDescription(operation.getDescription())
+				.withParams(operation.getParams())
 				.build()
 		).toList();
 	}

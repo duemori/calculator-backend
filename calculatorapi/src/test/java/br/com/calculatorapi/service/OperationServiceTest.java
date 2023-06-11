@@ -35,8 +35,10 @@ class OperationServiceTest {
 
 		var response = this.operationService.findAll();
 
-		assertEquals(1, response.size());
-		assertEquals(operation.getId(), response.get(0).getId());
-		assertEquals(operation.getDescription(), response.get(0).getDescription());
+		assertEquals(1, response.size(), "must have only one element");
+		assertEquals(operation.getId(), response.get(0).getId(), "id must be equal to operation´s");
+		assertEquals(operation.getDescription(), response.get(0).getDescription(),
+				"description must be equal to operation´s");
+		assertEquals(operation.getParams(), response.get(0).getParams(), "params must be equal to operation´s");
 	}
 }

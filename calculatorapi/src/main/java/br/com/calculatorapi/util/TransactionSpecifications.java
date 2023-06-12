@@ -26,21 +26,21 @@ public final class TransactionSpecifications {
 		throw new UnsupportedOperationException();
 	}
 
-	public static Specification<Transaction> createBy(TransactionFilterDTO filter) {
+	public static Specification<Transaction> createBy(TransactionFilterDTO filter, Integer userId) {
 		if (!StringUtils.hasText(filter.getSearch())) {
-			return isActive();
+			return userIdEqualTo(userId).and(isActive());
 		}
 
 		var search = String.format(LIKE_PATTERN, filter.getSearch());
 
 		return like(ID, search)
-				.or(like(USER_ID, search))
 				.or(like(AMOUNT, search))
 				.or(like(CREDIT_DEBIT, search))
 				.or(like(DATE, search))
 				.or(like(PARAMS, search))
 				.or(like(RESPONSE, search))
 				.or(operationLike(search))
+				.and(userIdEqualTo(userId))
 				.and(isActive());
 	}
 
@@ -50,6 +50,10 @@ public final class TransactionSpecifications {
 
 	public static Specification<Transaction> operationLike(String search) {
 		return (root, query, builder) -> builder.like(root.join(OPERATION, JoinType.LEFT).get(DESCRIPTION), search);
+	}
+
+	public static Specification<Transaction> userIdEqualTo(Integer userId) {
+		return (root, query, builder) -> builder.equal(root.get(USER_ID), userId);
 	}
 
 	public static Specification<Transaction> isActive() {

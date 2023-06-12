@@ -1,9 +1,12 @@
 package br.com.userapi.repository;
 
+import java.time.Duration;
+
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.stereotype.Repository;
 
 import br.com.userapi.exception.NotFoundException;
@@ -43,6 +46,7 @@ public class UserRegisteredClientRepository implements RegisteredClientRepositor
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 				.scope(ADMIN_SCOPE)
+				.tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofDays(1)).build())
 				.build();
 	}
 }

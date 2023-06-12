@@ -14,8 +14,6 @@ public class TransactionVO {
 
 	private String operation;
 
-	private Integer userId;
-
 	private BigDecimal amount;
 
 	private CreditDebit creditDebit;
@@ -30,7 +28,6 @@ public class TransactionVO {
 	public TransactionVO(TransactionVOBuilder builder) {
 		this.id = builder.id;
 		this.operation = builder.operation;
-		this.userId = builder.userId;
 		this.amount = builder.amount;
 		this.creditDebit = builder.creditDebit;
 		this.params = builder.params;
@@ -48,10 +45,6 @@ public class TransactionVO {
 
 	public String getOperation() {
 		return operation;
-	}
-
-	public Integer getUserId() {
-		return userId;
 	}
 
 	public BigDecimal getAmount() {
@@ -77,7 +70,6 @@ public class TransactionVO {
 	public static class TransactionVOBuilder {
 		private Integer id;
 		private String operation;
-		private Integer userId;
 		private BigDecimal amount;
 		private CreditDebit creditDebit;
 		private String params;
@@ -93,11 +85,6 @@ public class TransactionVO {
 
 		public TransactionVOBuilder withOperation(String operation) {
 			this.operation = operation;
-			return this;
-		}
-
-		public TransactionVOBuilder withUserId(Integer userId) {
-			this.userId = userId;
 			return this;
 		}
 

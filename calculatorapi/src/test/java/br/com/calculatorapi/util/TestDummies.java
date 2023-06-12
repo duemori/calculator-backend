@@ -24,14 +24,12 @@ public final class TestDummies {
 	public static TransactionDTO getTransactionDTO() {
 		var transaction = new TransactionDTO();
 		transaction.setOperationId(getOperation().getId());
-		transaction.setUserId(USER_ID);
 		transaction.setParams(new BigDecimal[] { BigDecimal.ONE, BigDecimal.TEN });
 		return transaction;
 	}
 
 	public static CreditDTO getCreditDTO() {
 		var credit = new CreditDTO();
-		credit.setUserId(USER_ID);
 		credit.setAmount(BigDecimal.TEN);
 		return credit;
 	}

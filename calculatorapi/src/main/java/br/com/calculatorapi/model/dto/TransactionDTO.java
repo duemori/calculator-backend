@@ -11,10 +11,6 @@ public class TransactionDTO {
 	@Positive(message = "operationId must be greater than zero")
 	private Integer operationId;
 
-	@NotNull(message = "userId is required")
-	@Positive(message = "userId must be greater than zero")
-	private Integer userId;
-
 	@NotNull(message = "params is required")
 	private BigDecimal[] params;
 
@@ -24,14 +20,6 @@ public class TransactionDTO {
 
 	public void setOperationId(Integer operationId) {
 		this.operationId = operationId;
-	}
-
-	public Integer getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Integer userId) {
-		this.userId = userId;
 	}
 
 	public BigDecimal[] getParams() {

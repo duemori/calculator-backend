@@ -3,6 +3,8 @@ package br.com.calculatorapi.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +32,8 @@ import jakarta.validation.Valid;
 @Tag(name = "Transactions API")
 public class TransactionController {
 
+	private static final String USER_ID_CLAIM = "uid";
+
 	private final TransactionService transactionService;
 
 	public TransactionController(TransactionService transactionService) {
@@ -44,8 +48,8 @@ public class TransactionController {
 			@ApiResponse(responseCode = "400", description = "Bad request"),
 			@ApiResponse(responseCode = "422", description = "Invalid operation or insufficient credit")
 	})
-	public ResponseEntity<Void> create(@Valid @RequestBody @Parameter(description = "Transaction information") TransactionDTO transaction) {
-		var id = this.transactionService.create(transaction);
+	public ResponseEntity<Void> create(@Valid @RequestBody @Parameter(description = "Transaction information") TransactionDTO transaction, @AuthenticationPrincipal Jwt jwt) {
+		var id = this.transactionService.create(transaction, getUserId(jwt));
 		var uri = UriComponentsBuilder.fromPath("/v1/transactions/{id}").buildAndExpand(id).toUri();
 
 		return ResponseEntity.created(uri).build();
@@ -58,8 +62,8 @@ public class TransactionController {
 			@ApiResponse(responseCode = "201", description = "Credit transaction created"),
 			@ApiResponse(responseCode = "400", description = "Bad request")
 	})
-	public ResponseEntity<Void> credit(@Valid @RequestBody @Parameter(description = "Credit transaction information") CreditDTO credit) {
-		var id = this.transactionService.create(credit);
+	public ResponseEntity<Void> credit(@Valid @RequestBody @Parameter(description = "Credit transaction information") CreditDTO credit, @AuthenticationPrincipal Jwt jwt) {
+		var id = this.transactionService.create(credit, getUserId(jwt));
 		var uri = UriComponentsBuilder.fromPath("/v1/transactions/{id}").buildAndExpand(id).toUri();
 
 		return ResponseEntity.created(uri).build();
@@ -71,8 +75,8 @@ public class TransactionController {
 			@ApiResponse(responseCode = "200", description = "Return transactions filtered and paginated"),
 			@ApiResponse(responseCode = "400", description = "Bad request")
 	})
-	public ResponseEntity<Page<TransactionVO>> findAll(@Valid TransactionFilterDTO filter) {
-		return ResponseEntity.ok(this.transactionService.findAll(filter));
+	public ResponseEntity<Page<TransactionVO>> findAll(@Valid TransactionFilterDTO filter, @AuthenticationPrincipal Jwt jwt) {
+		return ResponseEntity.ok(this.transactionService.findAll(filter, getUserId(jwt)));
 	}
 
 	@DeleteMapping("{id}")
@@ -81,8 +85,12 @@ public class TransactionController {
 			@ApiResponse(responseCode = "204", description = "Deleted successfully"),
 			@ApiResponse(responseCode = "404", description = "Transaction not found")
 	})
-	public ResponseEntity<Void> delete(@PathVariable Integer id) {
-		this.transactionService.delete(id);
+	public ResponseEntity<Void> delete(@PathVariable Integer id, @AuthenticationPrincipal Jwt jwt) {
+		this.transactionService.delete(id, getUserId(jwt));
 		return ResponseEntity.noContent().build();
+	}
+
+	private static Integer getUserId(Jwt jwt) {
+		return Integer.valueOf(jwt.getClaimAsString(USER_ID_CLAIM));
 	}
 }

@@ -15,10 +15,20 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2RefreshTokenGenerator;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -91,13 +101,30 @@ public class SecurityConfig {
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
-		var configuration = new CorsConfiguration();
+		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOriginPatterns(List.of("*"));
 		configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
 
-		var source = new UrlBasedCorsConfigurationSource();
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
+	}
+
+	@Bean
+	public OAuth2TokenGenerator<OAuth2Token> tokenGenerator(JWKSource<SecurityContext> jwkSource) {
+		JwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource);
+		JwtGenerator jwtGenerator = new JwtGenerator(jwtEncoder);
+		jwtGenerator.setJwtCustomizer(jwtCustomizer());
+
+		return new DelegatingOAuth2TokenGenerator(jwtGenerator, new OAuth2AccessTokenGenerator(), new OAuth2RefreshTokenGenerator());
+	}
+
+	@Bean
+	public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
+		return context -> {
+			var claims = context.getClaims();
+			claims.claim("uid", context.getRegisteredClient().getId());
+		};
 	}
 }

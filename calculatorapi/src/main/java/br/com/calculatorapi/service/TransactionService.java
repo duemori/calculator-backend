@@ -41,16 +41,14 @@ public class TransactionService {
 		this.calculatorFactory = calculatorFactory;
 	}
 
-	public Integer create(TransactionDTO transaction) throws UnprocessableException {
+	public Integer create(TransactionDTO transaction, Integer userId) throws UnprocessableException {
 		var operation = this.operationRepository.findById(transaction.getOperationId());
 
 		if (operation.isEmpty()) {
 			throw new UnprocessableException("Invalid operation");
 		}
 
-		// TODO: Use userId from logged user
-
-		var transactions = this.transactionRepository.findAllByUserIdAndActiveTrue(transaction.getUserId());
+		var transactions = this.transactionRepository.findAllByUserIdAndActiveTrue(userId);
 		var balance = transactions.stream()
 				.map(t -> t.getAmount().multiply(t.getCreditDebit().getMultiplier()))
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -65,7 +63,7 @@ public class TransactionService {
 
 		var newTransaction = this.transactionRepository.save(Transaction.builder()
 				.withOperationId(transaction.getOperationId())
-				.withUserId(transaction.getUserId())
+				.withUserId(userId)
 				.withAmount(operation.get().getCost())
 				.withCreditDebit(CreditDebit.D)
 				.withParams(Arrays.toString(transaction.getParams()))
@@ -78,11 +76,9 @@ public class TransactionService {
 		return newTransaction.getId();
 	}
 
-	public Integer create(CreditDTO credit) {
-		// TODO: Use userId from logged user
-
+	public Integer create(CreditDTO credit, Integer userId) {
 		var newTransaction = this.transactionRepository.save(Transaction.builder()
-				.withUserId(credit.getUserId())
+				.withUserId(userId)
 				.withAmount(credit.getAmount())
 				.withCreditDebit(CreditDebit.C)
 				.build()
@@ -93,14 +89,11 @@ public class TransactionService {
 		return newTransaction.getId();
 	}
 
-	public Page<TransactionVO> findAll(TransactionFilterDTO filter) {
-		// TODO: Returns just transactions belonging to logged user
-
-		return this.transactionRepository.findAll(TransactionSpecifications.createBy(filter), getPageable(filter))
+	public Page<TransactionVO> findAll(TransactionFilterDTO filter, Integer userId) {
+		return this.transactionRepository.findAll(TransactionSpecifications.createBy(filter, userId), getPageable(filter))
 				.map(transaction -> TransactionVO.builder()
 						.withId(transaction.getId())
 						.withOperation(transaction.getOperation() == null ? null : transaction.getOperation().getDescription())
-						.withUserId(transaction.getUserId())
 						.withAmount(transaction.getAmount())
 						.withCreditDebit(transaction.getCreditDebit())
 						.withParams(transaction.getParams())
@@ -117,11 +110,10 @@ public class TransactionService {
 		return PageRequest.of(filter.getPage(), filter.getPerPage());
 	}
 
-	public void delete(Integer id) throws NotFoundException {
-		// TODO: Transaction being excluded must belong to logged user.
-		var transaction = this.transactionRepository.findById(id).orElseThrow(() -> new NotFoundException("Transaction not found"));
+	public void delete(Integer id, Integer userId) throws NotFoundException {
+		var transaction = this.transactionRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new NotFoundException("Transaction not found"));
 
-		LOGGER.info("Transaction id {} inactivated by userId {}", id, transaction.getUserId());
+		LOGGER.info("Transaction id {} inactivated by userId {}", id, userId);
 
 		transaction.setActive(false);
 

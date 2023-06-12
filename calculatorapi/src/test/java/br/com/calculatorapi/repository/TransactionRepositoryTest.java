@@ -57,7 +57,7 @@ class TransactionRepositoryTest {
 	@Test
 	void testFindAllWithEmptyFilterShouldReturnAllActiveTransactionsSaved() {
 		var response = this.transactionRepository
-				.findAll(TransactionSpecifications.createBy(new TransactionFilterDTO()));
+				.findAll(TransactionSpecifications.createBy(new TransactionFilterDTO(), transaction1.getUserId()));
 
 		assertEquals(2, response.size(), "should return both transactions saved and active");
 		assertTrue(response.stream().map(Transaction::getId).allMatch(ids::contains),
@@ -66,11 +66,25 @@ class TransactionRepositoryTest {
 	}
 
 	@Test
+	void testFindByIdAndUserIdShouldReturnEmptyOptionalWhenTransactionNotFound() {
+		var response = this.transactionRepository.findByIdAndUserId(Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+		assertTrue(response.isEmpty(), "response must be empty when transaction not found");
+	}
+
+	@Test
+	void testFindByIdAndUserIdShouldReturnExpectedTransactionWhenItWasFound() {
+		var response = this.transactionRepository.findByIdAndUserId(transaction1.getId(), transaction1.getUserId());
+
+		assertEquals(transaction1.getId(), response.get().getId(), "response must be equal to transaction found");
+	}
+
+	@Test
 	void testFindAllWithFilterShouldReturnJustTransactionSpecified() {
 		var filter = new TransactionFilterDTO();
 		filter.setSearch(this.transaction2.getCreditDebit().name());
 
-		var response = this.transactionRepository.findAll(TransactionSpecifications.createBy(filter));
+		var response = this.transactionRepository.findAll(TransactionSpecifications.createBy(filter, transaction1.getUserId()));
 
 		assertEquals(1, response.size(), "should return just the transaction filtered");
 		assertEquals(this.transaction2.getId(), response.get(0).getId(), "should return the transaction filtered");

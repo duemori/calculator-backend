@@ -43,6 +43,8 @@ import br.com.calculatorapi.util.TestDummies;
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
 
+	private static final int USER_ID = 1;
+
 	@Mock
 	private OperationRepository operationRepository;
 
@@ -69,7 +71,8 @@ class TransactionServiceTest {
 
 		when(this.operationRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-		var exception = assertThrows(UnprocessableException.class, () -> this.transactionService.create(transaction),
+		var exception = assertThrows(UnprocessableException.class,
+				() -> this.transactionService.create(transaction, USER_ID),
 				"should throw UnprocessableException when operation does not exist");
 
 		assertEquals("Invalid operation", exception.getMessage(),
@@ -86,7 +89,8 @@ class TransactionServiceTest {
 		when(this.operationRepository.findById(anyInt())).thenReturn(Optional.of(TestDummies.getOperation()));
 		when(this.transactionRepository.findAllByUserIdAndActiveTrue(anyInt())).thenReturn(List.of());
 
-		var exception = assertThrows(UnprocessableException.class, () -> this.transactionService.create(transaction),
+		var exception = assertThrows(UnprocessableException.class,
+				() -> this.transactionService.create(transaction, USER_ID),
 				"should throw UnprocessableException when balance is lower then transaction cost");
 
 		assertEquals("Balance lower than operation cost", exception.getMessage(),
@@ -108,7 +112,7 @@ class TransactionServiceTest {
 		when(this.calculator.getResponse(any(BigDecimal[].class))).thenReturn("99.047");
 		when(this.transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
 
-		var response = this.transactionService.create(TestDummies.getTransactionDTO());
+		var response = this.transactionService.create(TestDummies.getTransactionDTO(), USER_ID);
 
 		assertEquals(transaction.getId(), response, "response should be equal to saved transaction id");
 
@@ -125,7 +129,7 @@ class TransactionServiceTest {
 
 		when(this.transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
 
-		var response = this.transactionService.create(TestDummies.getCreditDTO());
+		var response = this.transactionService.create(TestDummies.getCreditDTO(), USER_ID);
 
 		assertEquals(transaction.getId(), response, "response should be equal to saved transaction id");
 
@@ -141,7 +145,7 @@ class TransactionServiceTest {
 		when(this.transactionRepository.findAll(ArgumentMatchers.<Specification<Transaction>>any(),
 				any(Pageable.class))).thenReturn(new PageImpl<Transaction>(List.of(debit, credit)));
 
-		var response = this.transactionService.findAll(filter);
+		var response = this.transactionService.findAll(filter, USER_ID);
 
 		TransactionVO debitResponse = response.stream().filter(r -> r.getCreditDebit() == CreditDebit.D).findFirst()
 				.get();
@@ -150,7 +154,7 @@ class TransactionServiceTest {
 		assertEquals(debit.getId(), debitResponse.getId(), "id must be the same returned from repository");
 		assertEquals(debit.getOperation().getDescription(), debitResponse.getOperation(),
 				"operation must be the same returned from repository");
-		assertEquals(debit.getUserId(), debitResponse.getUserId(), "userId must be the same returned from repository");
+		assertEquals(debit.getUserId(), USER_ID, "userId must be the same passed as parameter");
 		assertEquals(debit.getAmount(), debitResponse.getAmount(), "amount must be the same returned from repository");
 		assertEquals(debit.getCreditDebit(), debitResponse.getCreditDebit(),
 				"creditDebit must be the same returned from repository");
@@ -169,28 +173,28 @@ class TransactionServiceTest {
 
 	@Test
 	void testDeleteWithInvalidIdShouldThrowNotFoundException() {
-		when(this.transactionRepository.findById(anyInt())).thenReturn(Optional.empty());
+		when(this.transactionRepository.findByIdAndUserId(anyInt(), anyInt())).thenReturn(Optional.empty());
 
-		var exception = assertThrows(NotFoundException.class, () -> this.transactionService.delete(1),
+		var exception = assertThrows(NotFoundException.class, () -> this.transactionService.delete(1, USER_ID),
 				"should throw NotFoundException when transaction does not exist");
 
 		assertEquals("Transaction not found", exception.getMessage(),
 				"exception message should be about transaction not found");
 
-		verify(this.transactionRepository, only()).findById(anyInt());
+		verify(this.transactionRepository, only()).findByIdAndUserId(anyInt(), anyInt());
 	}
 
 	@Test
 	void testDeleteWithValidIdShouldSaveModelUpdated() {
 		var transaction = TestDummies.getTransaction();
 
-		when(this.transactionRepository.findById(anyInt())).thenReturn(Optional.of(transaction));
+		when(this.transactionRepository.findByIdAndUserId(anyInt(), anyInt())).thenReturn(Optional.of(transaction));
 		when(this.transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
 
-		this.transactionService.delete(1);
+		this.transactionService.delete(1, USER_ID);
 
-		verify(this.transactionRepository, times(1)).findById(anyInt());
-		verify(this.transactionRepository, times(1)).findById(anyInt());
+		verify(this.transactionRepository, times(1)).findByIdAndUserId(anyInt(), anyInt());
+		verify(this.transactionRepository, times(1)).save(any(Transaction.class));
 		verifyNoMoreInteractions(this.transactionRepository);
 	}
 }

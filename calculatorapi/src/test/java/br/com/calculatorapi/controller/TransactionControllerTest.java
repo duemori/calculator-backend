@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +51,8 @@ import br.com.calculatorapi.util.TestDummies;
 @WebMvcTest(controllers = TransactionController.class)
 class TransactionControllerTest {
 
+	private static final JwtRequestPostProcessor JWT = jwt().jwt(t -> t.claim("uid", "1"));
+
 	@MockBean
 	private TransactionService transactionService;
 
@@ -57,10 +61,9 @@ class TransactionControllerTest {
 
 	@Test
 	void testCreateWithoutRequiredFieldsShouldReturnStatusBadRequest() throws Exception {
-		this.mockMvc.perform(post("/v1/transactions").with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/v1/transactions").with(csrf()).with(JWT).contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isBadRequest())
 				.andExpect(content().string(containsString("operationId is required")))
-				.andExpect(content().string(containsString("userId is required")))
 				.andExpect(content().string(containsString("params is required")));
 
 		verifyNoInteractions(this.transactionService);
@@ -71,13 +74,13 @@ class TransactionControllerTest {
 	void testCreateWithExceptionThrownShouldReturnExpectedStatus(Throwable throwable, HttpStatus status, String errorMessage) throws Exception {
 		var body = new ObjectMapper().writeValueAsString(TestDummies.getTransactionDTO());
 
-		when(this.transactionService.create(any(TransactionDTO.class))).thenThrow(throwable);
+		when(this.transactionService.create(any(TransactionDTO.class), anyInt())).thenThrow(throwable);
 
-		this.mockMvc.perform(post("/v1/transactions").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
+		this.mockMvc.perform(post("/v1/transactions").with(csrf()).with(JWT).contentType(MediaType.APPLICATION_JSON).content(body))
 				.andExpect(status().is(status.value()))
 				.andExpect(content().string(errorMessage));
 
-		verify(this.transactionService, only()).create(any(TransactionDTO.class));
+		verify(this.transactionService, only()).create(any(TransactionDTO.class), anyInt());
 	}
 
 	private static Stream<Arguments> exceptionThrown() {
@@ -96,21 +99,20 @@ class TransactionControllerTest {
 		var id = 1;
 		var body = new ObjectMapper().writeValueAsString(TestDummies.getTransactionDTO());
 
-		when(this.transactionService.create(any(TransactionDTO.class))).thenReturn(id);
+		when(this.transactionService.create(any(TransactionDTO.class), anyInt())).thenReturn(id);
 
-		this.mockMvc.perform(post("/v1/transactions").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
+		this.mockMvc.perform(post("/v1/transactions").with(csrf()).with(JWT).contentType(MediaType.APPLICATION_JSON).content(body))
 				.andExpect(status().isCreated())
 				.andExpect(content().string(""))
 				.andExpect(header().string("location", "/v1/transactions/" + id));
 
-		verify(this.transactionService, only()).create(any(TransactionDTO.class));
+		verify(this.transactionService, only()).create(any(TransactionDTO.class), anyInt());
 	}
 
 	@Test
 	void testCreditWithoutRequiredFieldsShouldReturnStatusBadRequest() throws Exception {
-		this.mockMvc.perform(post("/v1/transactions/credits").with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/v1/transactions/credits").with(csrf()).with(JWT).contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isBadRequest())
-				.andExpect(content().string(containsString("userId is required")))
 				.andExpect(content().string(containsString("amount is required")));
 
 		verifyNoInteractions(this.transactionService);
@@ -121,14 +123,14 @@ class TransactionControllerTest {
 		var id = 1;
 		var body = new ObjectMapper().writeValueAsString(TestDummies.getCreditDTO());
 
-		when(this.transactionService.create(any(CreditDTO.class))).thenReturn(id);
+		when(this.transactionService.create(any(CreditDTO.class), anyInt())).thenReturn(id);
 
-		this.mockMvc.perform(post("/v1/transactions/credits").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
+		this.mockMvc.perform(post("/v1/transactions/credits").with(csrf()).with(JWT).contentType(MediaType.APPLICATION_JSON).content(body))
 				.andExpect(status().isCreated())
 				.andExpect(content().string(""))
 				.andExpect(header().string("location", "/v1/transactions/" + id));
 
-		verify(this.transactionService, only()).create(any(CreditDTO.class));
+		verify(this.transactionService, only()).create(any(CreditDTO.class), anyInt());
 	}
 
 	@Test
@@ -143,26 +145,26 @@ class TransactionControllerTest {
 
 	@Test
 	void testFindAllWithValidParamsShouldReturnStatusOk() throws Exception {
-		when(this.transactionService.findAll(any(TransactionFilterDTO.class))).thenReturn(Page.empty());
+		when(this.transactionService.findAll(any(TransactionFilterDTO.class), anyInt())).thenReturn(Page.empty());
 
-		this.mockMvc.perform(get("/v1/transactions?page=1&perPage=10"))
+		this.mockMvc.perform(get("/v1/transactions?page=1&perPage=10").with(JWT))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content").value(hasSize(0)))
 				.andExpect(jsonPath("$.last").value(true))
 				.andExpect(jsonPath("$.totalPages").value(1))
 				.andExpect(jsonPath("$.totalElements").value(0));
 
-		verify(this.transactionService, only()).findAll(any(TransactionFilterDTO.class));
+		verify(this.transactionService, only()).findAll(any(TransactionFilterDTO.class), anyInt());
 	}
 
 	@Test
 	void testDeleteWithValidIdShouldReturnStatusNoContent() throws Exception {
-		doNothing().when(this.transactionService).delete(anyInt());
+		doNothing().when(this.transactionService).delete(anyInt(), anyInt());
 
-		this.mockMvc.perform(delete("/v1/transactions/1").with(csrf()))
+		this.mockMvc.perform(delete("/v1/transactions/1").with(csrf()).with(JWT))
 				.andExpect(status().isNoContent())
 				.andExpect(content().string(""));
 
-		verify(this.transactionService, only()).delete(anyInt());
+		verify(this.transactionService, only()).delete(anyInt(), anyInt());
 	}
 }
